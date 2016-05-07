@@ -10,6 +10,12 @@ var api = {
 	},
 	getSearchByCat(category) {
 		var url = `http://api.sjdsdirectory.com/category/${category}`;
+		console.log("Search by Cat: " + url);
+		return fetch(url).then((res) => res.json());
+	},
+	getCompany(compId) {
+		var url = `http://api.sjdsdirectory.com/getbusiness/?id=${compId}`;
+		console.log("Search by Prod Id: " + url);
 		return fetch(url).then((res) => res.json());
 	}
 }

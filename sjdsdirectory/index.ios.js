@@ -27,6 +27,7 @@ class sjdsdirectory extends React.Component{
   render() {
     return (
     <NavigatorIOS
+      ref="nav"
     	style={styles.container}
       initialRoute={{
         title: 'SJDS Directory',

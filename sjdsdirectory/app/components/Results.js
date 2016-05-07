@@ -1,11 +1,13 @@
 var React = require('react-native');
 var Separator = require('../helpers/Separator');
+Profile = require('./Profile');
 
 var {
 	Text,
 	View,
 	ScrollView,
 	Image,
+	TouchableHighlight,
 	StyleSheet
 } = React;
 
@@ -36,6 +38,16 @@ var styles = StyleSheet.create({
 });
 
 class Results extends React.Component{
+	constructor (props){
+		console.log("RESULTS Props: " + Object.keys(props));
+		super(props);
+		this.state = {
+			keyword: '',
+			resultList: this.createResultView(),
+			isLoading: false,
+			error: false
+		}
+	}
 	getUrl(){
 		var res = this.props.searchInfo
 		var url = "http://api.sjdsdirectory.com/media/business_images/" + res[0].id + "/" + res[0].image;
@@ -55,37 +67,67 @@ class Results extends React.Component{
 		return catString;
 	}
 
-	render(){
-		var res = this.props.searchInfo
-		var baseUrl = "http://api.sjdsdirectory.com/";
-		console.log(res);
-		viewList = [];
-		console.log("Results Count: ", res.length);
-	    resKeys = Object.keys(res);
-	    console.log(resKeys);
-	    resKeys.forEach(function(i){
-			var url = baseUrl + "media/business_images/" + res[i].id + "/" + res[i]['photos'][0];
-			var catlist = res[i]['cats'];
-			console.log(catlist);
-			
-			//var cats = getCats(catlist);
-			cats = '';
-			viewList.push(
-			 <View key={i} style={styles.viewContainer}>
-		 		<Text style={styles.headerName}> {res[i].name} </Text>
-		 		<Image source={{uri: url}} style={styles.image} />
-		 		<Text style={styles.pageText}>
-		 			{catlist}
-		 		</Text>
-			 	<Text style={styles.pageText}> {res[i].description} </Text>
-			 	<Separator />
-			 </View>
-			 )
+	gotoProfile(compId) {
+		this.setState({
+			isLoading: true
 		});
-		console.log("View List: ", viewList);
+		api.getCompany(compId)
+			.then((res) => {
+				console.log(res);
+				this.props.navigator.push({
+					title: "Company Profile",
+					component: Profile,
+					passProps: {compInfo: res}
+				});
+			});
+		console.log("Made it Here");
+	}
+	createResultView(){
+		var res = this.props.searchInfo
+		console.log(res);
+		var baseUrl = "http://api.sjdsdirectory.com/";
+		//console.log(res);
+		resultList = [];
+		//console.log("Results: ", res.results[i]);
+		if (this.props.resType == "search"){
+			res.results = res;
+		}
+	    resKeys = Object.keys(res.results);
+	    //console.log("KEYS: " + res.results);
+	    self = this;
+	    resKeys.forEach((i) => {
+	    	if (res.results[i].id == null) { 
+
+	    	} else {
+				var url = baseUrl + "media/business_images/" + res.results[i].id + "/" + res.results[i]['photos'][0];
+				var catlist = res.results[i]['cats'];
+				console.log(catlist);
+				
+				//var cats = getCats(catlist);
+				cats = '';
+				resultList.push(
+				 <View key={i} style={styles.viewContainer}>
+			 		<TouchableHighlight onPress={this.gotoProfile.bind(this, res.results[i].id)}>
+			 			<Text style={styles.headerName}> {res.results[i].name} </Text>
+			 		</TouchableHighlight>
+			 		<TouchableHighlight onPress={this.gotoProfile.bind(this, res.results[i].id)}>
+			 			<Image source={{uri: url}} style={styles.image} />
+			 		</TouchableHighlight>
+			 		<Text style={styles.pageText}>
+			 			{catlist}
+			 		</Text>
+				 	<Text style={styles.pageText}> {res.results[i].description} </Text>
+				 	<Separator />
+				 </View>
+				 )
+			}
+		});
+		return resultList;
+	}
+	render(){
 		return (
 			<ScrollView style={styles.container}>
-				{viewList}
+				{this.state.resultList}
 			</ScrollView>
 		)
 	}

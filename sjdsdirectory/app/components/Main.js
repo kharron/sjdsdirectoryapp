@@ -5,6 +5,7 @@ var Results = require('./Results');
 
 var {
 	View,
+	Image,
 	Text,
 	StyleSheet,
 	TextInput,
@@ -13,13 +14,16 @@ var {
 } = React;
 
 styles = StyleSheet.create({
+	imageContainer: {
+		flex: 1
+	},
 	mainContainer: {
 		flex: 1,
-		padding: 30,
+		padding: 0,
 		marginTop: 65,
 		flexDirection: 'column',
 		justifyContent: 'center',
-		backgroundColor: '#48BBEC'
+		backgroundColor: '#48BBEC',
 	},
 	title: {
 		color: 'white',
@@ -57,6 +61,7 @@ styles = StyleSheet.create({
 
 class Main extends React.Component {
 	constructor(props){
+		console.log("PROPS: " + Object.keys(props));
 		super(props);
 		this.state = {
 			keyword: '',
@@ -79,21 +84,40 @@ class Main extends React.Component {
 		this.setState({
 			isLoading: true
 		});
-		api.getSearchAll(this.state.keyword)
+		keyword = this.state.keyword;
+		keyword = "tacos";
+		api.getSearchAll(keyword)
 			.then((res) => {
+				console.log(res);	
 				this.props.navigator.push({
 					title: "Results",
 					component: Results,
-					passProps: {searchInfo: res}
+					passProps: {searchInfo: res, resType: "search"}
 				});
 			});
-		console.log('SUBMIT', this.state.keyword);
+		console.log('SUBMIT', keyword);
 	}
 
+	// get results from selecting a category
+	handleCategory(cat){
+		this.setState({
+			isLoading: true
+		});
+		api.getSearchByCat(cat)
+			.then((res) => {
+				console.log("RESULTS: " + res);
+				this.props.navigator.push({
+					title: "Results",
+					component: Results,
+					passProps: {searchInfo: res, resType: "cat"}
+				});
+			});
+		console.log("Cat Touched: " + cat);
+	}
 	render() {
 		return (
 
-			<View style={styles.mainContainer}>
+			<Image source={require('../images/bg-home.jpg')} style={styles.mainContainer}>
 				<Text style={styles.title}> Search San Juan Del Sur </Text>
 				<TextInput
 					style={styles.searchInput}
@@ -105,8 +129,8 @@ class Main extends React.Component {
 					underlayColor="white">
 					<Text style={styles.buttonText}> Search </Text>
 				</TouchableHighlight>
-				<Categories />
-			</View>
+				<Categories {...this.props} />
+			</Image>
 		)
 	}
 };

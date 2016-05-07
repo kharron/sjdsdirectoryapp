@@ -1,5 +1,6 @@
 React = require('react-native');
 api = require('../utils/api');
+Results = require('./Results');
 Separator = require('../helpers/Separator');
 
 var {
@@ -16,9 +17,11 @@ var styles = StyleSheet.create({
 	},
 	rowContainer: {
 		marginTop: 15,
+		flex: 1,
 	},
 	firstContainer: {
-		marginTop: 10
+		marginTop: 10,
+		flex: 1,
 	},
 	catText: {
 		fontSize: 18,
@@ -41,9 +44,13 @@ var styles = StyleSheet.create({
 
 class Categories extends React.Component {
 	constructor (props){
+		console.log("PROPS: " + Object.keys(props));
 		super(props)
 		this.state = {
-			catList: this.getCats()
+			keyword: "",
+			catList: this.getCats(),
+			isLoading: false,
+			error: false
 		}
 	}
 
@@ -58,12 +65,13 @@ class Categories extends React.Component {
 		 
 	}
 
-	handleTouch(cat){
+	handleTouch(cat, res){
 		this.setState({
 			isLoading: true
 		});
 		api.getSearchByCat(cat)
 			.then((res) => {
+				console.log("RESULTS: " + res);
 				this.props.navigator.push({
 					title: "Results",
 					component: Results,
@@ -80,7 +88,7 @@ class Categories extends React.Component {
 			if (j>0){
 				catList.push(
 				<TouchableHighlight
-					onPress={this.handleTouch.bind(this, res[i])}
+					onPress={this.handleTouch.bind(this, res[i], res)}
 					underlayColor='white'>
 				<View key={i} style={styles.rowContainer}>
 					<Text style={styles.catText}> {res[i]} </Text>
@@ -92,7 +100,7 @@ class Categories extends React.Component {
 				catList.push(
 
 				<TouchableHighlight
-					onPress={this.handleTouch.bind(this, res[i])}
+					onPress={this.handleTouch.bind(this, res[i], res)}
 					underlayColor='white'>
 				<View key={i} style={styles.firstContainer}>
 					
@@ -104,7 +112,6 @@ class Categories extends React.Component {
 			}
 			j += 1;
 		});
-		console.log(catList);
 		return catList;
 	}
 	render() {
